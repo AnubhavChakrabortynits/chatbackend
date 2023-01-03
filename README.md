@@ -8,4 +8,4 @@ Also This Chat App Has The Feature Of Chat Rooms.So a User Has To Join a room or
 Each Room Has a admin and the admin has the special ability to remove a user from the room and also to delete a particular room.
 Users Can Also Leave a room if they want to..
 
----------------------------------------------------------                            ------------------------------------------------------------------------
+----------------------------------------------------------                            ------------------------------------------------------------------------
