@@ -15,4 +15,5 @@ router.post('/create',signuser.createRoom)
 router.post('/deleteroom',signuser.deleteRoom)
 router.post('/removeuser',signuser.rmUser)
 router.post('/getuinaroom',signuser.getUinRoom)
+router.post('/banuser',signuser.banUser)
 module.exports = router;

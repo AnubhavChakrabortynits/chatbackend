@@ -7,7 +7,8 @@ const roomSchema=new Schema({
     password:{type: String,required:true,unique:true},
     admin: {type: String,required:true},
     people:[{name:{type:String,required:true}}],  
-    chats: [{mesg:{type:String,required:true},name:{type:String,required:true}}]
+    chats: [{mesg:{type:String,required:true},name:{type:String,required:true}}],
+    bannedUsers:[{name:{type:String,required:true}}]
 })
 
 const room = mongoose.model("room", roomSchema);

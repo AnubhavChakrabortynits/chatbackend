@@ -92,6 +92,11 @@ const joinRoom=async(req,res)=>{
         return
        }
        else{ 
+        console.log(reqroom.bannedUsers.filter((item)=>item.name==name))
+        if(reqroom.bannedUsers.filter((item)=>item.name==name).length!=0){
+            res.status(200).json({error:'You Have Been Banned From This Room...'})
+            return
+        }
         const existinguser=reqroom.people
         if(existinguser.find((user)=>user.name==name)){
             res.status(200).json({success:'Already In Room',room:reqroom})
@@ -180,4 +185,33 @@ const getUinRoom=async(req,res)=>{
 
 }
 
-module.exports={rmUser,getUinRoom,signup,login,createRoom,joinRoom,initialJoin,deleteRoom}
+const banUser=async(req,res)=>{
+    await mongoose.connect("mongodb://localhost:27017/Chat",{ useNewUrlParser: true,
+    useUnifiedTopology: true}) 
+
+    const room=await Room.findOne({name:req.body.room})
+    if(!room){
+        res.status(200).json({error:"User Could Not Be Banned"})
+       // console.log(room)
+        return
+    }
+   
+    
+    const user=room.people.filter((user)=>user.name==req.body.name)[0]
+    // console.log(user)
+   
+    
+    if(user){
+        room.people=room.people.filter((user)=>user.name!=req.body.name)
+        room.bannedUsers.push(user)
+        await room.save()
+        res.status(200).json({success:"true",room:room})
+        return
+    }
+    else{ 
+        res.status(200).json({error:'user could not be Banned'})
+        return
+    }
+}
+
+module.exports={rmUser,getUinRoom,signup,login,createRoom,joinRoom,initialJoin,deleteRoom,banUser}

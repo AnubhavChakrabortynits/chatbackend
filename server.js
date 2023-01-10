@@ -34,6 +34,10 @@ io.on('connection',(socket)=>{
           io.to(room).emit('mesg',{mesg:`Admin Removed ${name} From The Room`,room:room,name:name,type:'userremoved'})
           return
         }
+        if(mesg=='User Banned'){
+          io.to(room).emit('mesg',{mesg:`Admin Banned ${name} From The Room`,room:room,name:name,type:'userbanned'})
+          return
+        }
 
         if(mesg=="User Left"){
           io.to(room).emit('mesg',{mesg:`${name} Has Left The Room`,room:room,name:name,type:'userleft'})
