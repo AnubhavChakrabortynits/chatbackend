@@ -6,14 +6,15 @@ const router=express.Router()
 router.get('/',(req,res)=>{
     res.send('Your on Landing page')
 })
-
 router.post('/login',signuser.login)
 router.post('/signup',signuser.signup)
-router.post('/join',signuser.joinRoom)
-router.post('/initialjoin',signuser.initialJoin)
-router.post('/create',signuser.createRoom)
-router.post('/deleteroom',signuser.deleteRoom)
+router.post('/onroompage',signuser.onRoomPage)
+router.post('/join',signuser.authenticate,signuser.joinRoom)
+router.post('/initialjoin',signuser.authenticate,signuser.initialJoin)
+router.post('/create',signuser.authenticate,signuser.createRoom)
+router.post('/deleteroom',signuser.authenticate,signuser.deleteRoom)
 router.post('/removeuser',signuser.rmUser)
 router.post('/getuinaroom',signuser.getUinRoom)
 router.post('/banuser',signuser.banUser)
 module.exports = router;
+  
