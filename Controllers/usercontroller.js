@@ -143,8 +143,7 @@ const rmUser=async(req,res)=>{
 
 }
 
-
-const deleteRoom=async(req,res)=>{
+const deleteRoom=async(req,res)=>{ 
 
     const room=await Room.findOneAndDelete({name:req.body.room})
     res.status(200).json({success:'true',room:room})
