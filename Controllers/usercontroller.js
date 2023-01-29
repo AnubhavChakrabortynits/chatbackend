@@ -1,15 +1,14 @@
-
-const User=require('../Model/user')
-const Room=require('../Model/chatroom')
+const User=require('../Model/user');
+const Room=require('../Model/chatroom');
 var CryptoJS = require("crypto-js");
-const mongoose=require('mongoose')
+const mongoose=require('mongoose');
+var jwt=require('jsonwebtoken');
 const users=[];
 
 const signup=async(req,res)=>{
-    await mongoose.connect("mongodb://localhost:27017/Chat",{ useNewUrlParser: true,
-    useUnifiedTopology: true})
 
     try{
+
         const name=req.body.name
         const password=req.body.password
         const user=new User({name:name,password:CryptoJS.AES.encrypt(password,'secret key 123').toString()})
@@ -24,33 +23,30 @@ const signup=async(req,res)=>{
     }
 
     const login=async(req,res)=>{
-
-        await mongoose.connect("mongodb://localhost:27017/Chat",{ useNewUrlParser: true,
-        useUnifiedTopology: true})
     
         const name=req.body.name
        
-         const user=await User.findOne({name:name});
-        // console.log(user,name)
-         if(user==null){
+        const user=await User.findOne({name:name});
+
+        if(user==null){
             res.status(200).json({error:"No Such User"})
             return
-         }
+        }
 
-         if(CryptoJS.AES.decrypt(user?.password,'secret key 123').toString(CryptoJS.enc.Utf8)==req.body.password){
-            res.status(200).json({success:"true",user:user})
-         }
-         else{
+        if(CryptoJS.AES.decrypt(user?.password,'secret key 123').toString(CryptoJS.enc.Utf8)==req.body.password){
+            var token = jwt.sign({ user: name }, 'secret-1234567');
+            res.status(200).json({user:token,success:"true"})   
+        }
+        else{
             res.status(200).json({error :"Wrong Password"})
-         }
+        }
     }
 
 
     const createRoom=async(req,res)=>{
-        await mongoose.connect("mongodb://localhost:27017/Chat",{ useNewUrlParser: true,
-        useUnifiedTopology: true}) 
-
+        
         try{
+
             const rname=req.body.room
             const rpassword=req.body.roompass
             const admin=req.body.name
@@ -64,40 +60,36 @@ const signup=async(req,res)=>{
 
             const room=new Room({name:rname,password:CryptoJS.AES.encrypt(rpassword,'secret key 123').toString(),admin:admin})
             room.people.push({name:admin})
+
             await room.save()
 
             res.status(200).json({success:"Room Created",room})
         }
         catch(e){
-           // console.log(e)
         res.status(200).json({error: "Room with Same Name or Password Exists"})
         }
     }
-
+ 
 const joinRoom=async(req,res)=>{
-
-    await mongoose.connect("mongodb://localhost:27017/Chat",{ useNewUrlParser: true,
-    useUnifiedTopology: true})
 
     const name=req.body.name
     const room=req.body.room
     const roompass=req.body.roompass
-
     const reqroom=await Room.findOne({name:room})
-    
+     
     if(reqroom){
-      //  console.log(CryptoJS.AES.decrypt(reqroom?.password,'secret key 123').toString(CryptoJS.enc.Utf8))
        if(CryptoJS.AES.decrypt(reqroom?.password,'secret key 123').toString(CryptoJS.enc.Utf8)!=roompass){
         res.status(200).json({error:'Invalid Password'})
         return
        }
        else{ 
-        console.log(reqroom.bannedUsers.filter((item)=>item.name==name))
         if(reqroom.bannedUsers.filter((item)=>item.name==name).length!=0){
             res.status(200).json({error:'You Have Been Banned From This Room...'})
             return
         }
+
         const existinguser=reqroom.people
+
         if(existinguser.find((user)=>user.name==name)){
             res.status(200).json({success:'Already In Room',room:reqroom})
             return
@@ -112,15 +104,10 @@ const joinRoom=async(req,res)=>{
     }
     
         res.status(200).json({error:'No Such Room..U Can Create One.'})
-    
 }    
 
-
-
 const initialJoin=async(req,res)=>{
-    await mongoose.connect("mongodb://localhost:27017/Chat",{ useNewUrlParser: true,
-    useUnifiedTopology: true})
-     
+
     const room=req.body.room 
     const reqroom=await Room.findOne({name:room})
     const chats=reqroom?.chats
@@ -132,24 +119,16 @@ const initialJoin=async(req,res)=>{
 
 }  
 
-
-
-
 const rmUser=async(req,res)=>{
-    await mongoose.connect("mongodb://localhost:27017/Chat",{ useNewUrlParser: true,
-    useUnifiedTopology: true})
 
     const room=await Room.findOne({name:req.body.room})
+
     if(!room){
         res.status(200).json({error:"User Could Not Be Deleted"})
-       // console.log(room)
         return
     }
-   
-    
+     
     const user=room.people.filter((user)=>user.name==req.body.name)[0]
-    // console.log(user)
-   
     
     if(user){
         room.people=room.people.filter((user)=>user.name!=req.body.name)
@@ -167,9 +146,6 @@ const rmUser=async(req,res)=>{
 
 const deleteRoom=async(req,res)=>{
 
-    await mongoose.connect("mongodb://localhost:27017/Chat",{ useNewUrlParser: true,
-    useUnifiedTopology: true})
-
     const room=await Room.findOneAndDelete({name:req.body.room})
     res.status(200).json({success:'true',room:room})
 
@@ -177,29 +153,21 @@ const deleteRoom=async(req,res)=>{
 
 
 const getUinRoom=async(req,res)=>{
-    await mongoose.connect("mongodb://localhost:27017/Chat",{ useNewUrlParser: true,
-    useUnifiedTopology: true}) 
     
-   const users=await Room.findOne({name:req.body.room})
-   res.status(200).json({users:users.people}) 
+    const users=await Room.findOne({name:req.body.room})
+    res.status(200).json({users:users.people}) 
 
 }
 
 const banUser=async(req,res)=>{
-    await mongoose.connect("mongodb://localhost:27017/Chat",{ useNewUrlParser: true,
-    useUnifiedTopology: true}) 
 
     const room=await Room.findOne({name:req.body.room})
     if(!room){
         res.status(200).json({error:"User Could Not Be Banned"})
-       // console.log(room)
         return
     }
    
-    
     const user=room.people.filter((user)=>user.name==req.body.name)[0]
-    // console.log(user)
-   
     
     if(user){
         room.people=room.people.filter((user)=>user.name!=req.body.name)
@@ -214,4 +182,28 @@ const banUser=async(req,res)=>{
     }
 }
 
-module.exports={rmUser,getUinRoom,signup,login,createRoom,joinRoom,initialJoin,deleteRoom,banUser}
+const onRoomPage=(req,res)=>{
+
+    try{
+        var user=jwt.verify(req.body.user,'secret-1234567');
+        res.status(200).json({user:user,success:"true"});
+       }
+       catch(err){
+        res.status(200).json({error: "Please Login..."})
+       }
+}
+
+const authenticate=async(req,res,next)=>{
+
+   try{
+    var user=await jwt.verify(req.body.user,'secret-1234567');
+    next();
+   }
+   catch(err){
+    console.log(err);
+    res.status(200).json({error: "Please Login..."})
+   }
+}
+
+ 
+module.exports={rmUser,getUinRoom,signup,login,createRoom,joinRoom,initialJoin,deleteRoom,banUser,onRoomPage,authenticate}
