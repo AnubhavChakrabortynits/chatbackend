@@ -156,7 +156,7 @@ const getUinRoom=async(req,res)=>{
     
     const users=await Room.findOne({name:req.body.room})
     res.status(200).json({users:users.people}) 
-
+  
 }
 
 const banUser=async(req,res)=>{
