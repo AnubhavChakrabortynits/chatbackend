@@ -17,21 +17,16 @@ mongoose.connect("mongodb://localhost:27017/Chat",{ useNewUrlParser: true,
 useUnifiedTopology: true})
 
 io.on('connection',(socket)=>{
-    // console.log('We have a new connection');
-    socket.on('join',async({name,room,roompass})=>{
+        socket.on('join',async({name,room,roompass})=>{
       
         socket.join(room)
   
         const users=await Room.findOne({name:room})
         socket.to(room).emit('mesg',{mesg:`${name} joined room --${room}`,name:name,type:'userjoined',room:room,users:users.people})
-        //console.log(name,room,roompass)
     })
        
       socket.on('mesg',async({name,room,mesg})=>{
        // console.log(mesg,name)
-       await mongoose.connect("mongodb://localhost:27017/Chat",{ useNewUrlParser: true,
-       useUnifiedTopology: true}) 
-   
         if(mesg=='Room Deleted'){
           socket.to(room).emit('mesg',{mesg:mesg,room:room,name:name,type:'roomdeleted'})
           return 
@@ -54,20 +49,18 @@ io.on('connection',(socket)=>{
 
         const findroom=await Room.findOne({name:room})
         findroom.chats.push({mesg:CryptoJS.AES.encrypt(mesg,'secret key 123').toString(),name:name}) 
-       // console.log(findroom)
+        
         await findroom.save() 
         io.to(room).emit('mesg',{mesg:mesg,room:room,name:name,type:'chat'})
         })
 
       socket.on('disconnect',({name,room})=>{
         io.to(room).emit('mesg',{type:'userleft',mesg:`${name} has left room --${room}`})
-          //console.log('user has left the room');
       })
 
      socket.on('create',({name,room,roompass})=>{
         socket.join(room)
         io.sockets.in(room).emit('roomcreated',`${name} created the room --${room}`)
-        //console.log(name,room,roompass)
      })
   
 })

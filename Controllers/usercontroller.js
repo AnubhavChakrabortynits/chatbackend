@@ -23,9 +23,10 @@ const signup=async(req,res)=>{
     }
 
     const login=async(req,res)=>{
-    
+
+    try{   
+
         const name=req.body.name
-       
         const user=await User.findOne({name:name});
 
         if(user==null){
@@ -40,6 +41,11 @@ const signup=async(req,res)=>{
         else{
             res.status(200).json({error :"Wrong Password"})
         }
+    }
+    catch(e){
+        res.status(400).json({error:"SOmething Went Wrong. Please Try Again..."})
+    }
+
     }
 
 
@@ -71,6 +77,8 @@ const signup=async(req,res)=>{
     }
  
 const joinRoom=async(req,res)=>{
+
+    try{
 
     const name=req.body.name
     const room=req.body.room
@@ -104,9 +112,16 @@ const joinRoom=async(req,res)=>{
     }
     
         res.status(200).json({error:'No Such Room..U Can Create One.'})
+
+        }
+        catch(e){
+            res.status(400).json({error:"Something Went Wrong..."})
+        }
 }    
 
 const initialJoin=async(req,res)=>{
+
+   try{
 
     const room=req.body.room 
     const reqroom=await Room.findOne({name:room})
@@ -114,13 +129,19 @@ const initialJoin=async(req,res)=>{
     for(let i=0;i<chats.length;i++){
         chats[i].mesg=CryptoJS.AES.decrypt(chats[i]?.mesg,'secret key 123').toString(CryptoJS.enc.Utf8)
     }
-    // console.log(chats)
+
     res.status(200).json({chats:chats})
+     }
+     catch(e){
+        res.status(400).json({error:"Something Went Wrong..."})
+     }
 
 }  
 
 const rmUser=async(req,res)=>{
 
+    try{
+    
     const room=await Room.findOne({name:req.body.room})
 
     if(!room){
@@ -140,25 +161,43 @@ const rmUser=async(req,res)=>{
         res.status(200).json({error:'user could not be deleted'})
         return
     }
+}
+catch(e){
+    res.status(400).json({error:"Something Went Wrong"})
+}
 
 }
 
 const deleteRoom=async(req,res)=>{ 
 
+    try{
+
     const room=await Room.findOneAndDelete({name:req.body.room})
     res.status(200).json({success:'true',room:room})
+    }
+    catch(e){
+        res.status(400).json({error:"Something Went Wrong..."})
+    }
 
 }
 
 
 const getUinRoom=async(req,res)=>{
     
+    try{
+
     const users=await Room.findOne({name:req.body.room})
     res.status(200).json({users:users.people}) 
+    }
+    catch(e){
+        res.status(400).json({error:"Something Went Wrong"})
+    }
   
 }
 
 const banUser=async(req,res)=>{
+
+    try{
 
     const room=await Room.findOne({name:req.body.room})
     if(!room){
@@ -179,6 +218,10 @@ const banUser=async(req,res)=>{
         res.status(200).json({error:'user could not be Banned'})
         return
     }
+   }
+   catch(e){
+    res.status(400).json({error:"Something went Wrong.."})
+   }
 }
 
 const onRoomPage=(req,res)=>{
